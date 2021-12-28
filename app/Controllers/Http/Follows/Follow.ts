@@ -8,6 +8,6 @@ export default class FollowController {
 
     const user = await User.findOrFail(followingId)
 
-    await user.related('followers').attach([auth.user!.id])
+    await user.related('followers').sync([auth.user!.id])
   }
 }

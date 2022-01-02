@@ -1,7 +1,11 @@
 import test from 'japa'
+import { request } from 'Test/utils'
 
 test.group('Example', () => {
-  test('assert sum', (assert) => {
-    assert.equal(2 + 2, 4)
+  test('ensure the root route works', async (assert) => {
+    const { body } = await request.get('/')
+
+    assert.exists(body.hello)
+    assert.equal(body.hello, 'world')
   })
 })

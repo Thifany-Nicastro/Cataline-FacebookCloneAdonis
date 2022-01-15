@@ -1,6 +1,6 @@
 import test from 'japa'
 import { request } from 'Test/utils'
-import { User } from 'App/Models'
+import { UserFactory, PostFactory } from 'Database/Factories'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 test.group('Example', (group) => {
@@ -12,39 +12,18 @@ test.group('Example', (group) => {
     await Database.rollbackGlobalTransaction()
   })
 
-  test('ensure the login works', async (assert) => {
-    await User.create({
-      email: 'teste@teste.com',
-      password: 'secret',
-      username: 'testeuser',
-      name: 'teste'
-    })
+  test('....', async (assert) => {
+    const user = await UserFactory.merge({ password: 'secret' }).with('posts', 5).create()
+    // const posts = await PostFactory.createMany(5, (post) => post.merge({ userId: user.id }))
 
     const { body } = await request
       .post('/auth')
       .send({
-        email: 'teste@teste.com',
+        email: user.email,
         password: 'secret'
       })
       .expect(200)
 
-    assert.exists(body.token)
-  })
-
-  test('.............', async (assert) => {
-    await User.create({
-      email: 'teste@teste.com',
-      password: 'secret',
-      username: 'testeuser',
-      name: 'teste'
-    })
-
-    const { body, status } = await request.post('/auth').send({
-      email: 'teste@teste.com',
-      password: 'secret'
-    })
-
-    assert.equal(status, 200)
     assert.exists(body.token)
   })
 })

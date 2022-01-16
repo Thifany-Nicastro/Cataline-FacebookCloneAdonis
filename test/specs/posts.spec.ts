@@ -117,3 +117,32 @@ test.group('/posts', (group) => {
     await request.delete(`/posts/${post.id}`).set('authorization', `bearer ${token}`).expect(401)
   })
 })
+
+test.group('/posts/:id/media', (group) => {
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction()
+  })
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction()
+  })
+
+  test('[store] - should able to attach an image to a post', async (assert) => {
+    const { token, user } = await generateToken()
+    const post = await PostFactory.merge({ userId: user.id }).create()
+
+    await request
+      .post(`/posts/${post.id}/media`)
+      .set('authorization', `bearer ${token}`)
+      .attach('file', 'Test/assets/image.png')
+      .expect(200)
+
+    const postMedia = await Database.from('files')
+      .where({ file_category: 'post', owner_id: post.id })
+      .first()
+
+    assert.exists(postMedia.id)
+  })
+
+  test('[store] - should fail to attach an image to a post from another user', async (assert) => {})
+})
